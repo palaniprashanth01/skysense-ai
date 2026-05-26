@@ -1,0 +1,168 @@
+@import "tailwindcss";
+
+/* -----------------------------------------------------------
+ * ORYZO AI semantic design tokens
+ * Source: design-system-oryzo-ai spec
+ * Tailwind v4 picks up these CSS vars as utility classes:
+ *   --color-brand        -> bg-brand / text-brand / border-brand
+ *   --color-ink          -> text-ink / bg-ink
+ *   alpha:               bg-brand/15, border-edge/40, etc.
+ * --------------------------------------------------------- */
+@theme {
+  /* Surfaces */
+  --color-canvas: #000000;
+  --color-surface: #0a0604;
+  --color-surface-elev: #382416;
+
+  /* Ink (text) */
+  --color-ink: #ffedd7;
+  --color-ink-muted: rgba(255, 237, 215, 0.62);
+  --color-ink-subtle: rgba(255, 237, 215, 0.45);
+  --color-ink-faint: rgba(255, 237, 215, 0.28);
+
+  /* Brand */
+  --color-brand: #dc5000;
+  --color-brand-hover: #ff6a1a;
+  --color-brand-strong: #ff8a3d;
+  --color-brand-soft: rgba(220, 80, 0, 0.12);
+
+  /* Edges (borders) */
+  --color-edge: rgba(220, 80, 0, 0.18);
+  --color-edge-strong: rgba(220, 80, 0, 0.45);
+
+  /* Status */
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-danger:  #f87171;
+
+  /* Radius — per spec */
+  --radius-xs: 14px;
+  --radius-sm: 22.5px;
+  --radius-md: 28px;
+  --radius-lg: 36px;
+  --radius-full: 9999px;
+
+  /* Motion — per spec */
+  --motion-instant: 180ms;
+  --motion-fast: 200ms;
+  --motion-normal: 250ms;
+
+  /* Typography — halyard-display family per spec */
+  --font-sans: "halyard-display", "Halyard Display", "Inter",
+    system-ui, -apple-system, Avenir, Helvetica, Arial, sans-serif;
+}
+
+:root {
+  /* Bump base font-size so all rem-based Tailwind sizes scale up ~12.5% */
+  font-size: 18px;
+
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "ss02";
+  line-height: 1.55;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+
+  color-scheme: dark;
+  color: var(--color-ink);
+  background-color: var(--color-canvas);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(1100px 600px at 12% -10%, color-mix(in oklab, var(--color-brand) 18%, transparent), transparent 60%),
+    radial-gradient(900px 500px at 110% 110%, color-mix(in oklab, var(--color-brand-strong) 10%, transparent), transparent 55%),
+    var(--color-canvas);
+  color: var(--color-ink);
+  overflow-x: hidden;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-brand) 35%, transparent);
+  color: #fff;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--color-brand) 35%, transparent);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in oklab, var(--color-brand) 60%, transparent);
+}
+
+/* Accessibility — focus-visible */
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Brand utilities — all reference tokens, no raw hex */
+@layer utilities {
+  .text-brand-gradient {
+    background: linear-gradient(
+      120deg,
+      var(--color-ink) 0%,
+      var(--color-brand-strong) 55%,
+      var(--color-brand) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .surface-card {
+    background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-surface-elev) 55%, transparent),
+      color-mix(in oklab, var(--color-surface) 85%, transparent)
+    );
+    border: 1px solid var(--color-edge);
+    backdrop-filter: blur(8px);
+  }
+  .grain {
+    background-image: radial-gradient(
+      color-mix(in oklab, var(--color-ink) 4%, transparent) 1px,
+      transparent 1px
+    );
+    background-size: 3px 3px;
+  }
+  .ring-brand {
+    box-shadow: 0 0 0 1px var(--color-edge-strong),
+      0 18px 40px -18px color-mix(in oklab, var(--color-brand) 55%, transparent);
+  }
+}
+
+/* Keyframes */
+@keyframes float-plane {
+  0%   { transform: translate3d(-6%, 4%, 0) rotate(-8deg); }
+  50%  { transform: translate3d(6%, -6%, 0) rotate(-4deg); }
+  100% { transform: translate3d(-6%, 4%, 0) rotate(-8deg); }
+}
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-brand) 55%, transparent); }
+  70%  { box-shadow: 0 0 0 14px color-mix(in oklab, var(--color-brand) 0%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-brand) 0%, transparent); }
+}
+.animate-float-plane { animation: float-plane 9s ease-in-out infinite; }
+.animate-pulse-ring  { animation: pulse-ring 2.4s ease-out infinite; }
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

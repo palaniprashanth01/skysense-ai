@@ -37,11 +37,35 @@ interface FlightAssistantChatProps {
     onBooked?: () => void;
 }
 
+// Build dates relative to today so the prompts are always in the future
+// and the AI parser can extract a concrete departureDate.
+const fmt = (daysFromNow: number) => {
+    const d = new Date();
+    d.setDate(d.getDate() + daysFromNow);
+    return d.toISOString().slice(0, 10);
+};
+
 const QUICK_PROMPTS = [
-    { emoji: "🌍", label: "Mumbai → Berlin next month", prompt: "Find cheapest flights from Mumbai to Berlin in the next month for 2 adults" },
-    { emoji: "🏝️", label: "Cheap weekend to Bali", prompt: "Cheapest weekend flight from Bangalore to Bali in the next 4 weeks" },
-    { emoji: "🗼", label: "BLR → Paris, direct only", prompt: "Direct flights from Bangalore to Paris next month, sort by price" },
-    { emoji: "🌃", label: "Tomorrow DEL → BOM", prompt: "Find the cheapest flight from Delhi to Mumbai tomorrow" },
+    {
+        emoji: "🌍",
+        label: "Mumbai → Berlin",
+        prompt: `Cheapest flight from Mumbai to Berlin on ${fmt(30)} for 2 adults`,
+    },
+    {
+        emoji: "🏝️",
+        label: "Bangalore → Bali",
+        prompt: `Cheapest flight from Bangalore to Bali on ${fmt(21)}`,
+    },
+    {
+        emoji: "🗼",
+        label: "BLR → Paris, direct",
+        prompt: `Direct flight from Bangalore to Paris on ${fmt(45)}`,
+    },
+    {
+        emoji: "🌃",
+        label: "Tomorrow DEL → BOM",
+        prompt: `Cheapest flight from Delhi to Mumbai on ${fmt(1)}`,
+    },
 ];
 
 export default function FlightAssistantChat({ onBooked }: FlightAssistantChatProps) {

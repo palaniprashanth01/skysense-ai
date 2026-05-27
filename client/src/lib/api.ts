@@ -80,10 +80,21 @@ export async function sendChatMessage(
 
         const data = (await res.json()) as ChatApiResponse;
 
-        // Backend running but returning empty results (no Amadeus keys, or upstream
-        // returned nothing) → fall back to demo so the chat stays useful.
         const hasFlights = Array.isArray(data.flights) && data.flights.length > 0;
         const hasTrend = data.priceTrend && (data.priceTrend.points?.length ?? 0) > 0;
+        const parsedQuery = data.parsedQuery;
+        const hasParsedQuery =
+            !!parsedQuery && !!parsedQuery.origin && !!parsedQuery.destination;
+
+        // If the backend is asking for clarification (parser couldn't extract
+        // origin/destination/date), surface its message — don't replace with demo.
+        if (!hasFlights && !hasTrend && !hasParsedQuery) {
+            return data;
+        }
+
+        // Backend has a parsed query but Amadeus/SerpAPI returned nothing
+        // (no API keys, route blocked, upstream rate-limited, etc.) → fall back
+        // to mock data so the chat stays useful as a live demo.
         if (!hasFlights && !hasTrend) {
             return buildDemoResponse(message, nonStop);
         }

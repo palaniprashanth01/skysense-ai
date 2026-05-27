@@ -1,0 +1,26 @@
+# Netlify build + deploy config
+# Repo is a monorepo (client/ + server/). Netlify only builds the frontend.
+
+[build]
+  base    = "client"
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Netlify processes redirects top-to-bottom; first match wins.
+# /api/* MUST come before the catch-all SPA fallback.
+
+# Proxy /api/* to the Render backend (Express server)
+[[redirects]]
+  from   = "/api/*"
+  to     = "https://skysense-ai-vc53.onrender.com/api/:splat"
+  status = 200
+  force  = true
+
+# SPA fallback for React Router routes (must be last)
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200

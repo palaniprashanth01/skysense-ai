@@ -729,6 +729,23 @@ app.post("/api/payments/webhook", express.json({ type: "application/json" }), (r
   res.status(200).json({ received: true });
 });
 
+// Deploy version check — bump SERVER_BUILD when you want to verify a fresh deploy.
+// Curl /api/version to confirm which build is live.
+const SERVER_BUILD = "2026-05-27.serpapi-typefix";
+
+app.get("/api/version", (_req: express.Request, res: express.Response) => {
+  res.json({
+    build: SERVER_BUILD,
+    node: process.version,
+    uptime_seconds: Math.round(process.uptime()),
+    has_amadeus: !!process.env.AMADEUS_CLIENT_ID,
+    has_groq: !!process.env.GROQ_API_KEY,
+    has_serpapi: !!process.env.SERPAPI_API_KEY,
+    has_razorpay: !!process.env.RAZORPAY_KEY_ID,
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`SkySense AI server running on http://localhost:${PORT}`);
+  console.log(`  build: ${SERVER_BUILD}`);
 });

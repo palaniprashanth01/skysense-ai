@@ -237,13 +237,17 @@ async function searchSerpApi(parsed: any): Promise<FlightOffer[]> {
       // Let's filter manually after fetching to be safe if API param is ambiguous.
     };
 
-    // We'll fetch broadly and filter manually for better control
+    // SerpAPI google_flights `type` param: 1 = round trip (requires return_date),
+    // 2 = one way, 3 = multi-city. Default is 1, so we MUST set type=2 for one-way
+    // queries or the API returns "return_date is required if type is 1".
+    const isRoundTrip = !!parsed.returnDate;
     const response = await getJson({
       engine: "google_flights",
+      type: isRoundTrip ? "1" : "2",
       departure_id: parsed.origin,
       arrival_id: parsed.destination,
       outbound_date: parsed.departureDate,
-      return_date: parsed.returnDate,
+      ...(isRoundTrip ? { return_date: parsed.returnDate } : {}),
       currency: parsed.currency,
       hl: "en",
       api_key: process.env.SERPAPI_API_KEY,

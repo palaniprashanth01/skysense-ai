@@ -258,35 +258,62 @@ async function searchSerpApi(parsed: any): Promise<FlightOffer[]> {
     const otherFlights = response.other_flights || [];
     const all = [...bestFlights, ...otherFlights];
 
-    all.forEach((f: any) => {
-      const segments: FlightSegment[] = f.flights_cluster?.map((s: any) => ({
-        from: s.departure_airport?.id || parsed.origin,
-        to: s.arrival_airport?.id || parsed.destination,
-        departureTime: s.departure_time,
-        arrivalTime: s.arrival_time,
-        airline: s.airline,
-        flightNumber: s.flight_number,
-        durationMinutes: s.duration // usually in minutes
-      })) || [];
+    // Convert SerpAPI's "2026-06-15 10:20" timestamps to ISO "2026-06-15T10:20:00".
+    const toIso = (t: string | undefined): string =>
+      typeof t === "string" && t.length >= 16
+        ? `${t.slice(0, 10)}T${t.slice(11, 16)}:00`
+        : t || "";
 
-      // If no segments found (sometimes structure varies), skip
+    // SerpAPI flight_number looks like "6E 1091" — split into airline + number.
+    const parseFlightNumber = (raw: string | undefined) => {
+      if (!raw) return { airline: "", number: "" };
+      const parts = String(raw).trim().split(/\s+/);
+      if (parts.length === 1) return { airline: "", number: parts[0] };
+      return { airline: parts[0], number: parts.slice(1).join(" ") };
+    };
+
+    all.forEach((f: any) => {
+      // ⚠️ SerpAPI uses `f.flights` (array of segments). The old code read
+      // `f.flights_cluster` which is null, dropping every SerpAPI result.
+      const rawSegments = Array.isArray(f.flights) ? f.flights : [];
+      const segments: FlightSegment[] = rawSegments.map((s: any) => {
+        const fn = parseFlightNumber(s.flight_number);
+        return {
+          from: s.departure_airport?.id || parsed.origin,
+          to: s.arrival_airport?.id || parsed.destination,
+          departureTime: toIso(s.departure_airport?.time),
+          arrivalTime: toIso(s.arrival_airport?.time),
+          airline: fn.airline || s.airline || "",
+          flightNumber: s.flight_number || `${fn.airline}${fn.number}`,
+          durationMinutes: s.duration ?? 0,
+        };
+      });
+
       if (!segments.length) return;
 
-      const priceTotal = f.price; // usually a number like 1234
-      const id = `serp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      // Build a deterministic id from price + first flight number so dedup
+      // with Amadeus works (random IDs caused the map to always retain both).
+      const idSeed = `${f.price}-${segments[0].flightNumber}`.replace(/\s+/g, "");
+      const id = `serp-${idSeed}`;
+
+      // Pull airline codes from each segment (e.g. "6E", "UK").
+      const airlineCodes = Array.from(
+        new Set(segments.map((s) => s.airline).filter(Boolean))
+      );
 
       flights.push({
         id,
         origin: parsed.origin,
         destination: parsed.destination,
         departureDate: parsed.departureDate,
-        priceTotal,
+        priceTotal: typeof f.price === "number" ? f.price : Number(f.price) || 0,
         currency: parsed.currency,
         segments,
-        totalDurationMinutes: f.total_duration,
-        numberOfStops: f.layovers?.length || (segments.length - 1),
-        airlineCodes: [f.airline], // simplified
-        fareClass: "ECONOMY" // default
+        totalDurationMinutes:
+          typeof f.total_duration === "number" ? f.total_duration : segments.reduce((a, s) => a + s.durationMinutes, 0),
+        numberOfStops: Math.max(0, segments.length - 1),
+        airlineCodes: airlineCodes.length ? airlineCodes : [String(f.airline || "")],
+        fareClass: "ECONOMY",
       });
     });
 
@@ -731,7 +758,7 @@ app.post("/api/payments/webhook", express.json({ type: "application/json" }), (r
 
 // Deploy version check — bump SERVER_BUILD when you want to verify a fresh deploy.
 // Curl /api/version to confirm which build is live.
-const SERVER_BUILD = "2026-05-27.serpapi-typefix";
+const SERVER_BUILD = "2026-05-27.serpapi-parser-fix";
 
 app.get("/api/version", (_req: express.Request, res: express.Response) => {
   res.json({

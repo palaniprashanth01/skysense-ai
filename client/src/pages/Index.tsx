@@ -81,7 +81,7 @@ export default function Index() {
                         </p>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 self-start md:self-end">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 self-start md:self-end shrink-0">
                         <Button
                             onClick={() => navigate("/skysense")}
                             size="lg"
@@ -93,12 +93,12 @@ export default function Index() {
                             whileHover={{ y: -2 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={() => setSetupOpen(true)}
-                            className="group relative inline-flex items-center justify-center gap-2 h-12 px-5 rounded-full font-medium tracking-tight text-ink bg-canvas/40 border border-edge-strong hover:border-brand hover:bg-brand/15 transition-all"
+                            className="group relative inline-flex items-center justify-center whitespace-nowrap gap-2 h-12 px-5 rounded-full font-medium tracking-tight text-ink bg-canvas/40 border border-edge-strong hover:border-brand hover:bg-brand/15 transition-all"
                         >
                             <span className="absolute inset-0 rounded-full bg-gradient-to-r from-brand/20 via-transparent to-brand-strong/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-                            <Zap className="h-4 w-4 text-brand" />
+                            <Zap className="h-4 w-4 text-brand shrink-0" />
                             <span className="relative">Connect to Claude</span>
-                            <span className="relative inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.18em] text-ink-subtle border-l border-edge pl-2 ml-1">
+                            <span className="relative hidden md:inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.18em] text-ink-subtle border-l border-edge pl-2 ml-1">
                                 1-click
                             </span>
                         </motion.button>

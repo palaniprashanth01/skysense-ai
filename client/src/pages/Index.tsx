@@ -148,7 +148,9 @@ export default function Index() {
                     <Card className="h-full">
                         <CardHeader className="flex flex-row items-center justify-between">
                             <CardTitle>Recent Searches</CardTitle>
-                            <Button variant="ghost" size="sm">View All</Button>
+                            <span className="text-xs uppercase tracking-[0.16em] text-ink-subtle">
+                                Last 5
+                            </span>
                         </CardHeader>
                         <CardContent className="space-y-3">
                             {recentSearches.length === 0 ? (

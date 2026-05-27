@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Home, Plane, Calendar, Settings, LogOut, PlaneTakeoff, Zap } from "lucide-react";
+import { Home, Plane, Calendar, PlaneTakeoff, Zap } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import clsx from "clsx";
@@ -115,21 +115,24 @@ const Sidebar = () => {
                 </button>
             </motion.div>
 
-            {/* User / Footer */}
+            {/* Footer attribution */}
             <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.45, duration: 0.4 }}
                 className="p-4 border-t border-edge"
             >
-                <button className="flex items-center gap-3 px-4 py-3 w-full rounded-2xl text-ink-muted hover:bg-brand/8 hover:text-ink transition-all">
-                    <Settings className="h-5 w-5" />
-                    <span className="font-medium text-base">Settings</span>
-                </button>
-                <button className="flex items-center gap-3 px-4 py-3 w-full rounded-2xl text-danger/80 hover:bg-danger/10 hover:text-danger transition-all mt-1">
-                    <LogOut className="h-5 w-5" />
-                    <span className="font-medium text-base">Logout</span>
-                </button>
+                <a
+                    href="https://github.com/palaniprashanth01/skysense-ai"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center justify-between gap-2 px-3 py-2 text-xs text-ink-subtle hover:text-ink transition-colors"
+                >
+                    <span className="tracking-wider uppercase">v1.0 · OSS</span>
+                    <span className="inline-flex items-center gap-1 hover:underline">
+                        GitHub →
+                    </span>
+                </a>
             </motion.div>
 
             <SetupClaudeModal open={setupOpen} onClose={() => setSetupOpen(false)} />
